@@ -481,8 +481,25 @@ function install(){
     fi
     
     # parse the response
-    filename="$(echo "${httpresponse}" |grep attachment |sed 's/\r$//' |sed -e 's/Content-Disposition: attachment; filename=//' 2>&1)"
-    #location=$(echo "${httpresponse}" |grep -E '^Location: ' |tail -n -1 |sed -e 's/Location: //' 2>&1)
+
+    filename="$(echo "${httpresponse}" | grep location)"
+    echo $filename 
+    #https://dl.factorio.com/releases/factorio_headless_x64_1.1.57.tar.xz?secure=nzjvxtChj8K-M9gC7n2WHA,1649082501
+    filename="$(echo "${filename}" | cut -d" " -f 2)"
+    echo $filename
+    #https://dl.factorio.com/releases/factorio_headless_x64_1.1.57.tar.xz?secure=nzjvxtChj8K-M9gC7n2WHA,1649082501
+    #Now, lets remove https://
+    filename="$(echo "${filename}" | awk '{n=split($NF,a,"/");print $5,a[n]}')"
+    echo $filename
+    #factorio_headless_x64_1.1.57.tar.xz?secure=mrwzQezXMFaXq8ZFOhaPmg,1649082890
+    #split on the ? to get the filename
+    filename="$(echo "${filename}" | cut -d'?' -f1)"
+    echo $filename
+    #" factorio_headless_x64_1.1.57.tar.xz"
+    #finally remove the useless starting space
+    filename="$(echo "${filename}" | sed 's/^ *//;s/ *$//')"
+    echo $filename
+    #factorio_headless_x64_1.1.57.tar.xz
     debug "Found, latest version: '${filename}'"
 
     if [ "${INSTALL_CACHE_TAR}" = 1 ]; then
